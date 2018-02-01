@@ -5,28 +5,24 @@ const serviceAccount = require('./serviceAccountKey.json');
 const axios = require('axios');
 const promptsUrl = "https://soapbox-teleprompt.appspot.com/v1/prompts";
 const port = process.env.PORT || 3000;
+const app = express();
 
 const firebaseApp = admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: 'https://soapboxx-staging.firebaseio.com'
 });
 
-const app = express();
-
-app.get('/', (request, response) => {
-    response.setHeader('Content-Type', 'application/json');
-    getPrompts(promptsUrl, (remoteResponse)=> {
-        processPrompts(remoteResponse.data.prompts, (promptsAdded) => {
-            let result = new Result(remoteResponse.data.prompts.length, promptsAdded, false, '');
-            response.write(JSON.stringify(result));
-            response.end();
-        });
-    }, (error) => {
-        let result = new Result(0, 0, true, 'error: ' + error);
-        response.write(JSON.stringify(result));
-        response.end();
-    })
-});
+const Result = class {
+    constructor(fetched, added, error, message) {
+        this.fetched = fetched;
+        this.added = added;
+        this.error = error;
+        this.message = message;
+    }
+    toString() {
+        return '(' + this.fetched + ', ' + this.added + ', ' + this.error + ', ' + this.message + ')';
+    }
+};
 
 const getPrompts = function(url, response, error) {
     axios.get(url)
@@ -60,18 +56,20 @@ const processPrompts = function(prompts, success) {
     });
 };
 
-
-const Result = class {
-    constructor(fetched, added, error, message) {
-        this.fetched = fetched;
-        this.added = added;
-        this.error = error;
-        this.message = message;
-    }
-    toString() {
-        return '(' + this.fetched + ', ' + this.added + ', ' + this.error + ', ' + this.message + ')';
-    }
-};
+app.get('/', (request, response) => {
+    response.setHeader('Content-Type', 'application/json');
+    getPrompts(promptsUrl, (remoteResponse)=> {
+        processPrompts(remoteResponse.data.prompts, (promptsAdded) => {
+            let result = new Result(remoteResponse.data.prompts.length, promptsAdded, false, '');
+            response.write(JSON.stringify(result));
+            response.end();
+        });
+    }, (error) => {
+        let result = new Result(0, 0, true, 'error: ' + error);
+        response.write(JSON.stringify(result));
+        response.end();
+    })
+});
 
 app.listen(port, function () {
     console.log('server listening on port ' + port +'!');
