@@ -4,6 +4,7 @@ const express = require('express');
 const serviceAccount = require('./serviceAccountKey.json');
 const axios = require('axios');
 const promptsUrl = "https://soapbox-teleprompt.appspot.com/v1/prompts";
+const port = process.env.PORT || 3000;
 
 const firebaseApp = admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -72,6 +73,6 @@ const Result = class {
     }
 };
 
-app.listen(8000, function () {
-    console.log('server listening on port 8000!')
+app.listen(port, function () {
+    console.log('server listening on port ' + port +'!');
 });
