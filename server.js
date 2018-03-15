@@ -4,12 +4,12 @@ const express = require('express');
 const serviceAccount = require('./serviceAccountKey.json');
 const axios = require('axios');
 const promptsUrl = "https://soapbox-teleprompt.appspot.com/v1/prompts";
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 const app = express();
 
 const firebaseApp = admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: 'https://soapboxx-staging.firebaseio.com'
+  databaseURL: 'https://soapboxx-dev.firebaseio.com'
 });
 
 const Result = class {
